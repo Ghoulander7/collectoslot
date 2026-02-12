@@ -59,7 +59,7 @@ fun WinDisplay(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     val label = buildString {
-                        append("${win.payLine.displayName}: ${win.symbol.displayChar}x${win.matchCount}")
+                        append("${win.payLine.displayName}: ${win.symbol.displayName}x${win.matchCount}")
                         if (win.newCollection) append(" NEW!")
                     }
                     Text(

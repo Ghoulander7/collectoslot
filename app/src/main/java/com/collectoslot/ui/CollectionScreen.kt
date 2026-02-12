@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -23,7 +22,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
@@ -33,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.collectoslot.model.Collection
 import com.collectoslot.model.Symbol
+import com.collectoslot.ui.components.CherryIcon
 import com.collectoslot.ui.theme.Chrome
 import com.collectoslot.ui.theme.CreditGreen
 import com.collectoslot.ui.theme.DarkChrome
@@ -211,21 +210,15 @@ private fun SymbolEntry(
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            // Color indicator dot
-            Box(
-                modifier = Modifier
-                    .size(24.dp)
-                    .clip(CircleShape)
-                    .background(
-                        if (isCollected) tintColor else DarkChrome.copy(alpha = 0.3f)
-                    )
+            CherryIcon(
+                color = if (isCollected) tintColor else DarkChrome.copy(alpha = 0.3f),
+                size = 32.dp
             )
 
             Spacer(modifier = Modifier.width(12.dp))
 
-            // Cherry emoji + name
             Text(
-                text = if (isCollected) "${symbol.displayChar} ${symbol.displayName}" else "??? ${symbol.displayName}",
+                text = if (isCollected) symbol.displayName else "??? ${symbol.displayName}",
                 color = if (isCollected) Chrome else DarkChrome.copy(alpha = 0.5f),
                 fontSize = 16.sp,
                 fontFamily = FontFamily.Monospace
