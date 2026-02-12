@@ -20,6 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.collectoslot.model.WinResult
+import com.collectoslot.ui.theme.CreditGreen
 import com.collectoslot.ui.theme.Gold
 import com.collectoslot.ui.theme.SlotDarkPurple
 
@@ -57,9 +58,13 @@ fun WinDisplay(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    val label = buildString {
+                        append("${win.payLine.displayName}: ${win.symbol.displayChar}x${win.matchCount}")
+                        if (win.newCollection) append(" NEW!")
+                    }
                     Text(
-                        text = "${win.payLine.displayName}: ${win.symbol.displayChar}x${win.matchCount}",
-                        color = Gold,
+                        text = label,
+                        color = if (win.newCollection) CreditGreen else Gold,
                         fontSize = 14.sp,
                         fontFamily = FontFamily.Monospace
                     )

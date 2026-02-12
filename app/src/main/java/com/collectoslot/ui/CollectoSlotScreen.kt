@@ -42,12 +42,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.collectoslot.engine.Screen
 import com.collectoslot.engine.SlotViewModel
 import com.collectoslot.ui.components.CreditMeter
 import com.collectoslot.ui.components.PayTable
 import com.collectoslot.ui.components.ReelView
 import com.collectoslot.ui.components.WinDisplay
 import com.collectoslot.ui.theme.Chrome
+import com.collectoslot.ui.theme.CreditGreen
 import com.collectoslot.ui.theme.CrimsonRed
 import com.collectoslot.ui.theme.DarkChrome
 import com.collectoslot.ui.theme.DarkGold
@@ -89,7 +91,7 @@ fun CollectoSlotScreen(viewModel: SlotViewModel, modifier: Modifier = Modifier) 
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = "LUCKY SEVENS",
+                text = "COLLECTOSLOT",
                 color = SlotBackground,
                 fontSize = 28.sp,
                 fontWeight = FontWeight.ExtraBold,
@@ -98,10 +100,32 @@ fun CollectoSlotScreen(viewModel: SlotViewModel, modifier: Modifier = Modifier) 
             )
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Collection button + progress
+        val totalCollected = state.collection.collected.size
+        val totalSymbols = com.collectoslot.model.Symbol.entries.size
+        Button(
+            onClick = { viewModel.navigateTo(Screen.COLLECTION) },
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(8.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = SlotDarkPurple
+            )
+        ) {
+            Text(
+                text = "COLLECTION ($totalCollected / $totalSymbols)",
+                color = if (totalCollected == totalSymbols) CreditGreen else Gold,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 1.sp
+            )
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
 
         // Pay Table (collapsible)
-        PayTable()
+        PayTable(collection = state.collection)
 
         Spacer(modifier = Modifier.height(12.dp))
 

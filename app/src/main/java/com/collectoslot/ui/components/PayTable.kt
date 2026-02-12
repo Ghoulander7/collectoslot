@@ -4,10 +4,15 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -17,18 +22,25 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.collectoslot.model.Collection
 import com.collectoslot.model.Symbol
+import com.collectoslot.ui.symbolTintColor
 import com.collectoslot.ui.theme.Chrome
+import com.collectoslot.ui.theme.CreditGreen
 import com.collectoslot.ui.theme.DarkChrome
 import com.collectoslot.ui.theme.Gold
 import com.collectoslot.ui.theme.SlotDarkPurple
 
 @Composable
-fun PayTable(modifier: Modifier = Modifier) {
+fun PayTable(
+    collection: Collection,
+    modifier: Modifier = Modifier
+) {
     var expanded by remember { mutableStateOf(false) }
 
     Column(
@@ -66,33 +78,38 @@ fun PayTable(modifier: Modifier = Modifier) {
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text("SYMBOL", color = DarkChrome, fontSize = 10.sp, fontWeight = FontWeight.Bold)
-                    Text("x3", color = DarkChrome, fontSize = 10.sp, fontWeight = FontWeight.Bold)
-                    Text("x2", color = DarkChrome, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                    Text("x3 PAYOUT", color = DarkChrome, fontSize = 10.sp, fontWeight = FontWeight.Bold)
                 }
 
-                Symbol.entries.reversed().forEach { symbol ->
+                Symbol.entries.forEach { symbol ->
+                    val categoryComplete = collection.isCategoryComplete(symbol.category)
+                    val tintColor = symbolTintColor(symbol)
+
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(
+                                modifier = Modifier
+                                    .size(14.dp)
+                                    .clip(CircleShape)
+                                    .background(tintColor)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = "${symbol.displayChar} ${symbol.displayName}",
+                                color = Chrome,
+                                fontSize = 13.sp,
+                                fontFamily = FontFamily.Monospace
+                            )
+                        }
                         Text(
-                            text = "${symbol.displayChar} ${symbol.displayName}",
-                            color = Chrome,
-                            fontSize = 13.sp,
-                            fontFamily = FontFamily.Monospace
-                        )
-                        Text(
-                            text = "${symbol.payout3x}x",
-                            color = Gold,
+                            text = if (categoryComplete) "${symbol.basePayout3x * 3}x (3x BONUS)" else "${symbol.basePayout3x}x",
+                            color = if (categoryComplete) CreditGreen else Gold,
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Bold,
-                            fontFamily = FontFamily.Monospace
-                        )
-                        Text(
-                            text = if (symbol.payout2x > 0) "${symbol.payout2x}x" else "-",
-                            color = if (symbol.payout2x > 0) Chrome else DarkChrome,
-                            fontSize = 13.sp,
                             fontFamily = FontFamily.Monospace
                         )
                     }
@@ -103,6 +120,12 @@ fun PayTable(modifier: Modifier = Modifier) {
                     color = DarkChrome,
                     fontSize = 10.sp,
                     modifier = Modifier.padding(top = 6.dp)
+                )
+                Text(
+                    text = "Complete a category collection for 3x payout bonus!",
+                    color = Gold.copy(alpha = 0.7f),
+                    fontSize = 10.sp,
+                    modifier = Modifier.padding(top = 2.dp)
                 )
             }
         }

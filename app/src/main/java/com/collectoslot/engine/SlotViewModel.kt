@@ -10,6 +10,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+enum class Screen { SLOT, COLLECTION }
+
 class SlotViewModel : ViewModel() {
 
     private val engine = SlotEngine()
@@ -17,12 +19,19 @@ class SlotViewModel : ViewModel() {
     private val _state = MutableStateFlow(GameState())
     val state: StateFlow<GameState> = _state.asStateFlow()
 
+    private val _currentScreen = MutableStateFlow(Screen.SLOT)
+    val currentScreen: StateFlow<Screen> = _currentScreen.asStateFlow()
+
     // Reel animation sequences for each reel
     private val _reelSequences = MutableStateFlow<List<List<com.collectoslot.model.Symbol>>>(emptyList())
     val reelSequences: StateFlow<List<List<com.collectoslot.model.Symbol>>> = _reelSequences.asStateFlow()
 
     private val _spinningReels = MutableStateFlow(listOf(false, false, false))
     val spinningReels: StateFlow<List<Boolean>> = _spinningReels.asStateFlow()
+
+    fun navigateTo(screen: Screen) {
+        _currentScreen.value = screen
+    }
 
     fun spin() {
         val currentState = _state.value
@@ -69,9 +78,29 @@ class SlotViewModel : ViewModel() {
 
             delay(200)
 
-            // Evaluate wins
-            val wins = engine.evaluateWins(finalWindows, bet)
+            // Evaluate wins using current collection state for bonus calculation
+            val currentCollection = _state.value.collection
+            val wins = engine.evaluateWins(finalWindows, bet, currentCollection)
             val totalWin = wins.sumOf { it.payout }
+
+            // Add newly collected symbols from 3-of-a-kind wins
+            var updatedCollection = currentCollection
+            val newSymbols = mutableListOf<com.collectoslot.model.Symbol>()
+            for (win in wins) {
+                if (win.matchCount == 3 && !updatedCollection.hasCollected(win.symbol)) {
+                    updatedCollection = updatedCollection.collect(win.symbol)
+                    newSymbols.add(win.symbol)
+                }
+            }
+
+            val collectionMsg = if (newSymbols.isNotEmpty()) {
+                " NEW: ${newSymbols.joinToString { it.displayName }}!"
+            } else ""
+
+            val categoryJustCompleted = newSymbols.any { symbol ->
+                updatedCollection.isCategoryComplete(symbol.category) &&
+                    !currentCollection.isCategoryComplete(symbol.category)
+            }
 
             _state.update {
                 it.copy(
@@ -79,9 +108,11 @@ class SlotViewModel : ViewModel() {
                     isSpinning = false,
                     wins = wins,
                     lastWinTotal = totalWin,
+                    collection = updatedCollection,
                     message = when {
-                        totalWin > bet * 50 -> "JACKPOT! Won $totalWin credits!"
-                        totalWin > 0 -> "Winner! +$totalWin credits!"
+                        categoryJustCompleted -> "CATEGORY COMPLETE! 3x bonus active!$collectionMsg"
+                        totalWin > bet * 50 -> "JACKPOT! Won $totalWin credits!$collectionMsg"
+                        totalWin > 0 -> "Winner! +$totalWin credits!$collectionMsg"
                         it.credits == 0 -> "No credits remaining. Game over!"
                         else -> "No win. Try again!"
                     }

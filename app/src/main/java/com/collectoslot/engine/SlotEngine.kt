@@ -1,5 +1,7 @@
 package com.collectoslot.engine
 
+import com.collectoslot.model.Collection
+import com.collectoslot.model.GameState
 import com.collectoslot.model.PayLine
 import com.collectoslot.model.Symbol
 import com.collectoslot.model.WinResult
@@ -31,24 +33,32 @@ class SlotEngine(private val random: Random = Random.Default) {
         }
     }
 
-    /** Evaluate all pay lines and return any winning results. */
-    fun evaluateWins(reelWindows: List<List<Symbol>>, bet: Int): List<WinResult> {
+    /**
+     * Evaluate all pay lines and return any winning results.
+     * If the symbol's category is fully collected, the payout is multiplied.
+     */
+    fun evaluateWins(
+        reelWindows: List<List<Symbol>>,
+        bet: Int,
+        collection: Collection
+    ): List<WinResult> {
         val wins = mutableListOf<WinResult>()
 
         for (payLine in PayLine.entries) {
             val symbols = payLine.getSymbols(reelWindows)
 
-            // Check for 3-of-a-kind
+            // Only check for 3-of-a-kind (collection game)
             if (symbols[0] == symbols[1] && symbols[1] == symbols[2]) {
                 val symbol = symbols[0]
-                val payout = symbol.payout3x * bet
-                wins.add(WinResult(payLine, symbol, 3, payout))
-            }
-            // Check for 2-of-a-kind (first two match, only for symbols with a 2x payout)
-            else if (symbols[0] == symbols[1] && symbols[0].payout2x > 0) {
-                val symbol = symbols[0]
-                val payout = symbol.payout2x * bet
-                wins.add(WinResult(payLine, symbol, 2, payout))
+                val baseMultiplier = symbol.basePayout3x
+                val bonus = if (collection.isCategoryComplete(symbol.category)) {
+                    GameState.COMPLETION_BONUS_MULTIPLIER
+                } else {
+                    1
+                }
+                val payout = baseMultiplier * bet * bonus
+                val isNew = !collection.hasCollected(symbol)
+                wins.add(WinResult(payLine, symbol, 3, payout, newCollection = isNew))
             }
         }
 

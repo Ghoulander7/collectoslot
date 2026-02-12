@@ -10,7 +10,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
@@ -29,6 +31,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.collectoslot.model.Symbol
+import com.collectoslot.ui.symbolTintColor
 import com.collectoslot.ui.theme.DarkChrome
 import com.collectoslot.ui.theme.Gold
 import com.collectoslot.ui.theme.ReelBackground
@@ -121,11 +124,20 @@ fun ReelView(
                         .padding(4.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = symbol.displayChar,
-                        fontSize = 40.sp,
-                        textAlign = TextAlign.Center
-                    )
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = symbol.displayChar,
+                            fontSize = 32.sp,
+                            textAlign = TextAlign.Center
+                        )
+                        // Color indicator dot beneath the cherry emoji
+                        Box(
+                            modifier = Modifier
+                                .size(12.dp)
+                                .clip(CircleShape)
+                                .background(symbolTintColor(symbol))
+                        )
+                    }
                 }
                 if (index < visibleSymbols.lastIndex) {
                     HorizontalDivider(
