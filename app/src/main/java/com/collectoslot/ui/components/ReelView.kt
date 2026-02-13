@@ -1,9 +1,8 @@
 package com.collectoslot.ui.components
 
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.keyframes
+import androidx.compose.animation.core.CubicBezierEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -56,12 +55,10 @@ fun ReelView(
             animPosition.snapTo(0f)
             animPosition.animateTo(
                 targetValue = targetIndex,
-                animationSpec = keyframes {
-                    durationMillis = 2000
-                    (targetIndex * 0.85f) at 1000 using LinearEasing
-                    (targetIndex * 0.97f) at 1600 using FastOutSlowInEasing
-                    targetIndex at 2000 using FastOutSlowInEasing
-                }
+                animationSpec = tween(
+                    durationMillis = 2000,
+                    easing = CubicBezierEasing(0.1f, 0.0f, 0.0f, 1.0f)
+                )
             )
         } else {
             // Reset to 0 when spinning stops so it's clean for next spin
